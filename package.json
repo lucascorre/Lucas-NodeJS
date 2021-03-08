@@ -1,0 +1,23 @@
+{
+  "name": "lucas-nodejs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "exo1.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lucascorre/Lucas-NodeJS.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lucascorre/Lucas-NodeJS/issues"
+  },
+  "homepage": "https://github.com/lucascorre/Lucas-NodeJS#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
