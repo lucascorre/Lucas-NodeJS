@@ -26,8 +26,10 @@ client.connect((err, instance) => {
             rawResults.forEach(results => console.log(results));
         });
 
-        collection.updateOne({ _id: ObjectID("id du message") }, { $set: { message: "Bonjour" }});
+        //collection.updateOne({ _id: ObjectID("id du message") }, { $set: { message: "Bonjour" }});
 
         http.listen(3000, () => console.log('Server Ready'));
     }
 });
+
+app.use(express.static(__dirname + "/public"));
