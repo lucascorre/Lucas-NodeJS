@@ -1,14 +1,33 @@
 const express = require('express');
 const app = express();
-const fs = require('fs');
+const http = require('http').Server(app);
 
-const chatFile =fs.readFileSync('./index.html')
+const { MongoClient, ObjectID } = require('mongodb');
+//import { MongoClient, ObjectID } from 'mongodb';
 
-function chatController (req, res)  {
-    res.end(chatFile);
-}
+const { join } = require('path');
 
-app.get('/', (req,res) => res.end('Hello World'));
-app.get('/chat', chatController);
+const url = 'mongodb://localhost:27017';
+const client = new MongoClient(url);
 
-app.listen(3000, () => console.log('Server ready'));
+client.connect((err, instance) => {
+    if(err) {
+        process.exit(1);
+    }
+    else {
+        app.get('/', (req, res) => res.redirect('/chat'));
+
+        const db = instance.db('ChatNodeJS');
+        const collection = db.collection('Chat');
+
+        collection.insertOne({ Pseudo: 'Lucas', message: 'Hello World' });
+        
+        collection.find({}, (err, rawResults) => {
+            rawResults.forEach(results => console.log(results));
+        });
+
+        collection.updateOne({ _id: ObjectID("id du message") }, { $set: { message: "Bonjour" }});
+
+        http.listen(3000, () => console.log('Server Ready'));
+    }
+});
