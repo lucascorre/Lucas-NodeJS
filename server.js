@@ -1,35 +1,61 @@
 const express = require('express');
+const bodyParser = require('body-parser')
 const app = express();
 const http = require('http').Server(app);
+const io = require('socket.io')(http);
+const mongoose = require('mongoose');
 
-const { MongoClient, ObjectID } = require('mongodb');
-//import { MongoClient, ObjectID } from 'mongodb';
 
-const { join } = require('path');
+app.use(express.static(__dirname));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: false}))
 
-const url = 'mongodb://localhost:27017';
-const client = new MongoClient(url);
+let Message = mongoose.model('Message',{
+  pseudo : String,
+  message : String
+})
 
-client.connect((err, instance) => {
+let dbUrl = 'mongodb://localhost:27017'
+
+app.get('/messages', (req, res) => {
+  Message.find({},(err, messages)=> {
+    res.send(messages);
+  })
+})
+
+app.post('/messages', (req, res) => {
+  let message = new Message(req.body);
+  console.log(req.body.pseudo + ': ' + req.body.message);
+  message.save((err) =>{
+    console.log(err)
     if(err) {
-        process.exit(1);
+      res.sendStatus(500);
     }
     else {
-        app.get('/', (req, res) => res.redirect('/chat'));
-
-        const db = instance.db('ChatNodeJS');
-        const collection = db.collection('Chat');
-
-        collection.insertOne({ Pseudo: 'Lucas', message: 'Hello World' });
-        
-        collection.find({}, (err, rawResults) => {
-            rawResults.forEach(results => console.log(results));
-        });
-
-        //collection.updateOne({ _id: ObjectID("id du message") }, { $set: { message: "Bonjour" }});
-
-        http.listen(3000, () => console.log('Server Ready'));
+        io.emit('message', req.body);
+        res.sendStatus(200);
     }
+  })
+})
+
+io.on('connection', () =>{
+  console.log('a user is connected')
+})
+
+mongoose.connect(dbUrl, {useUnifiedTopology: true, useNewUrlParser: true});
+
+const db = mongoose.connection;
+/*
+const db = instance.db('ChatNodeJS');
+const collection = db.collection('Chat');
+*/
+db.on('error', err => console.error(err));
+db.once('open', () => {
+    console.log('ca marche');
+})
+
+let server = http.listen(3000, () => {
+  console.log('server is running on port', server.address().port);
 });
 
 app.use(express.static(__dirname + "/public"));
